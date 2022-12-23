@@ -19,13 +19,25 @@ const markup = galleryItems.map(
 gallery.innerHTML = markup.join("");
 
 gallery.addEventListener("click", onImgClick);
-let instance = "";
+const instance = basicLightbox.create(
+  `
+    <img src="">`,
+  {
+    onShow: (instance) => {
+      window.addEventListener("keydown", onEscapePress);
+    },
+    onClose: (instance) => {
+      window.removeEventListener("keydown", onEscapePress);
+    },
+  }
+);
 
 function onImgClick(event) {
   event.preventDefault();
-  window.addEventListener("keydown", onEscapePress);
-  instance = basicLightbox.create(`
-    <img src="${event.target.dataset.source}">`);
+  if (event.target.modeName !== "IMG") {
+    return;
+  }
+  instance.element().querySelector("img").src = event.target.dataset.source;
 
   instance.show();
 }
@@ -33,6 +45,6 @@ function onImgClick(event) {
 function onEscapePress(event) {
   if (event.code === "Escape") {
     instance.close();
-    window.removeEventListener("keydown", onEscapePress);
+    return;
   }
 }
